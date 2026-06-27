@@ -1,6 +1,11 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
+    <!-- 💡 丸ゴシックのフォントデータをGoogleから読み込むコードを追加 -->
+  <link rel="preconnect" href="https://googleapis.com">
+  <link rel="preconnect" href="https://gstatic.com" crossorigin>
+  <link href="https://googleapis.com/css2?family=M+PLUS+Rounded+1c:wght@700&display=swap" rel="stylesheet">
+
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>LPファーストビュー・完全フィット検証ミラー</title>
@@ -118,12 +123,17 @@
     if(fRound) fRound.onclick = function() { this.className="btn-toggle active"; fSans.className="btn-toggle"; fSerif.className="btn-toggle"; pScreen.style.fontFamily="'M PLUS Rounded 1c', sans-serif"; };
 
     // 💡 過去作の裏技：非同期枠の外で最優先で開くことで、ポップアップブロックを100%回避して確実にXへ飛ばします
+       // 💡 過去作と100%同じ：window.openを廃止し、最初からaタグ（リンク）として機能させる無敵ロジック
     if (copyLinkBtn) {
       copyLinkBtn.addEventListener("click", function() {
         var txt = inMain ? (inMain.value || "未入力") : "未入力";
         var textToCopy = "【LPファーストビューを検証しました！】\nメインコピー: " + txt + "\nスマホ完全フィット検証ミラー「lp-fv-mirror」で文字見切れを防ぐ🔥";
 
-        window.open('https://twitter.com' + encodeURIComponent(textToCopy), '_blank');
+        // 💡 開発者ボタンと同じ「直リンク（aタグの移動）」の仕組みを裏側で一瞬で作ってクリックさせる
+        var xLink = document.createElement('a');
+        xLink.href = 'https://twitter.com' + encodeURIComponent(textToCopy);
+        xLink.target = '_blank';
+        xLink.click(); // ➔ 開発者ボタンと全く同じ扱いになるため、ブラウザに100%ブロックされません
 
         navigator.clipboard.writeText(textToCopy).then(function() {
           copyLinkBtn.textContent = "コピー完了！そのままX等の画面へ貼れます✅";

@@ -8,42 +8,52 @@
   <link rel="preconnect" href="https://googleapis.com">
   <link rel="preconnect" href="https://gstatic.com" crossorigin>
   <link href="https://googleapis.com/css2?family=M+PLUS+Rounded+1c:wght@700&display=swap" rel="stylesheet">
-  <style>
-    :root { --bg-color: #f4f7f6; --panel-bg: #ffffff; --text-color: #333333; --accent-color: #0070f3; }
+   <style>
+    :root { --bg-color: #f4f7f6; --panel-bg: #ffffff; --text-color: #333333; --accent-color: #0070f3; --border-color: #cccccc; }
     body { font-family: 'Helvetica Neue', Arial, sans-serif; background-color: var(--bg-color); color: var(--text-color); margin: 0; padding: 20px; box-sizing: border-box; }
     
-    /* 💻 左に操作パネル、右にスマホが美しく並ぶ「本物の2カラム構造」に完全復元 */
     .container { max-width: 1100px; margin: 0 auto; display: flex; gap: 30px; }
     .left-panel { flex: 1; background: var(--panel-bg); padding: 25px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.08); box-sizing: border-box; }
     .right-preview { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: flex-start; }
     
     h1 { font-size: 1.4rem; color: var(--accent-color); margin: 0 0 5px 0; }
     .subtitle { font-size: 0.85rem; color: #666; margin-bottom: 25px; }
-    h2 { font-size: 1.1rem; color: #111; border-left: 4px solid var(--accent-color); padding-left: 8px; margin-top: 25px; margin-bottom: 15px; }
+    .section-title { font-size: 0.95rem; font-weight: bold; color: #111; margin: 20px 0 10px 0; border-left: 4px solid var(--accent-color); padding-left: 8px; }
     label { font-weight: bold; font-size: 0.85rem; display: block; margin-top: 12px; color: #555; }
     input, textarea { width: 100%; padding: 12px; box-sizing: border-box; border: 1px solid #ccc; border-radius: 6px; font-size: 1rem; margin-top: 6px; background-color: #fafafa; font-family: inherit; }
     input:focus, textarea:focus { border-color: var(--accent-color); background-color: #fff; outline: none; }
     
     .toggle-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-top: 6px; }
-    .btn-toggle { padding: 10px; background: #e0e0e0; color: #333; border: none; border-radius: 6px; font-size: 0.85rem; font-weight: bold; cursor: pointer; }
+    .toggle-grid-4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin-top: 6px; }
+    .btn-toggle { padding: 10px 5px; background: #e0e0e0; color: #333; border: none; border-radius: 6px; font-size: 0.8rem; font-weight: bold; cursor: pointer; text-align: center; transition: all 0.2s; }
     .btn-toggle.active { background: var(--accent-color); color: white; }
     
-    /* 潰れていたボタン幅を100%正常化するCSS */
     .btn-container { display: flex; gap: 15px; margin-top: 25px; }
     .main-btn { flex: 1; padding: 14px 10px; border: none; border-radius: 6px; font-size: 0.95rem; font-weight: bold; cursor: pointer; text-align: center; text-decoration: none; box-sizing: border-box; }
     .btn-clear { background-color: #e0e0e0; color: #333; }
     .btn-x { background-color: #1da1f2; color: white; }
     
-    /* 📱 内蔵スマホミラー領域（サイズを黄金比に完全固定） */
-    .phone-wrapper { position: relative; background: #000; border: 12px solid #333; border-radius: 40px; overflow: hidden; width: 393px; height: 750px; box-shadow: 0 15px 40px rgba(0,0,0,0.2); }
-    .phone-screen { width: 100%; height: 100%; background: #fff; color: #000; padding: 40px 20px 20px 20px; box-sizing: border-box; overflow-y: auto; text-align: center; display: flex; flex-direction: column; align-items: center; }
+    /* 📱 スマホ可変ギミック */
+    .phone-wrapper { position: relative; background: #000; border: 12px solid #333; border-radius: 40px; overflow: hidden; box-shadow: 0 15px 40px rgba(0,0,0,0.2); transition: all 0.2s ease; }
+    .phone-wrapper.size-normal { width: 393px; height: 750px; }
+    .phone-wrapper.size-large { width: 430px; height: 830px; }
+    
+    .phone-screen { width: 100%; height: 100%; background: #fff; color: #000; padding: 45px 20px 20px 20px; box-sizing: border-box; overflow-y: auto; text-align: center; display: flex; flex-direction: column; align-items: center; transition: all 0.2s; }
     .phone-notch { position: absolute; top: 10px; left: 50%; transform: translateX(-50%); width: 100px; height: 22px; background: #000; border-radius: 12px; z-index: 10; }
-    .fold-line { position: absolute; top: 620px; left: 0; width: 100%; border-bottom: 2px dashed #ff007f; pointer-events: none; z-index: 5; }
+    
+    /* 動的な見切れ線位置 */
+    .fold-line { position: absolute; left: 0; width: 100%; border-bottom: 2px dashed #ff007f; pointer-events: none; z-index: 5; }
+    .phone-wrapper.size-normal .fold-line { top: 620px; }
+    .phone-wrapper.size-large .fold-line { top: 700px; }
     .fold-label { position: absolute; right: 5px; background: #ff007f; color: white; font-size: 9px; padding: 2px 4px; border-radius: 3px; transform: translateY(-100%); font-weight: bold; }
     
-    .mirror-main { font-weight: bold; font-size: 1.4rem; margin-top: 30px; line-height: 1.4; word-break: break-all; }
-    .mirror-sub { font-size: 0.95rem; color: #444; margin-top: 15px; line-height: 1.5; word-break: break-all; }
-    .mirror-btn { display: block; width: 90%; padding: 14px; margin-top: auto; margin-bottom: 20px; background: #2ed573; color: white; font-weight: bold; text-decoration: none; border-radius: 25px; font-size: 0.95rem; text-align: center; }
+    /* ミラーパーツ */
+    .mirror-main { font-weight: bold; line-height: 1.4; margin-top: 30px; word-break: break-all; width: 100%; }
+    .mirror-sub { color: #444; margin-top: 15px; line-height: 1.5; word-break: break-all; width: 100%; }
+    .mirror-btn { display: block; width: 90%; margin-top: auto; margin-bottom: 20px; color: white; font-weight: bold; text-decoration: none; border-radius: 25px; text-align: center; transition: all 0.2s; }
+    
+    .count-badge { float: right; font-size: 0.75rem; color: #666; }
+    .count-badge.alert-red { color: #ff007f; font-weight: bold; }
     
     .ad-space { margin-top: 30px; padding: 20px 10px; background: #fafafa; border: 2px dashed #ddd; border-radius: 8px; text-align: center; color: #999; font-size: 0.8rem; }
     .ad-box { width: 100%; height: 90px; display: flex; justify-content: center; align-items: center; background: #eee; color: #777; font-weight: bold; margin-top: 8px; border-radius: 4px; }
@@ -53,6 +63,7 @@
     
     @media (max-width: 900px) { .container { flex-direction: column; } .phone-wrapper { margin: 0 auto; } }
   </style>
+
 </head>
 <body>
 

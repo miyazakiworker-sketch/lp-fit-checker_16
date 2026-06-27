@@ -5,537 +5,127 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>LPファーストビュー・完全フィット検証ミラー</title>
   <style>
-    :root {
-      --bg-color: #0d0f12;
-      --panel-bg: #1a1f26;
-      --text-color: #e2e8f0;
-      --accent-color: #3182ce;
-      --border-color: #2d3748;
-      --input-bg: #2d3748;
-    }
-
-    body {
-      background-color: var(--bg-color);
-      font-family: 'Helvetica Neue', Arial, 'Hiragino Kaku Gothic ProN', sans-serif;
-      color: var(--text-color);
-      margin: 0;
-      padding: 20px;
-      box-sizing: border-box;
-    }
-
-    .container {
-      max-width: 1200px;
-      margin: 0 auto;
-      display: flex;
-      gap: 30px;
-    }
-
-    .left-panel {
-      flex: 1;
-      background: var(--panel-bg);
-      padding: 25px;
-      border-radius: 16px;
-      border: 1px solid var(--border-color);
-      box-shadow: 0 10px 30px rgba(0,0,0,0.5);
-    }
-
-    .right-preview {
-      flex: 1;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: flex-start;
-    }
-
-    h1 {
-      font-size: 1.4rem;
-      color: #fff;
-      margin: 0 0 5px 0;
-    }
-
-    .subtitle {
-      font-size: 0.85rem;
-      color: #a0aec0;
-      margin-bottom: 25px;
-    }
-
-    .section-title {
-      font-size: 0.95rem;
-      font-weight: bold;
-      color: #fff;
-      margin: 20px 0 10px 0;
-      border-left: 3px solid var(--accent-color);
-      padding-left: 8px;
-    }
-
-    .form-group {
-      margin-bottom: 15px;
-    }
-
-    label {
-      display: block;
-      font-size: 0.8rem;
-      color: #cbd5e0;
-      margin-bottom: 6px;
-      font-weight: bold;
-    }
-
-    input, textarea, select {
-      width: 100%;
-      background: var(--input-bg);
-      border: 1px solid var(--border-color);
-      border-radius: 8px;
-      padding: 10px 12px;
-      color: #fff;
-      font-size: 0.9rem;
-      box-sizing: border-box;
-    }
-
-    input:focus, textarea:focus, select:focus {
-      outline: none;
-      border-color: var(--accent-color);
-    }
-
-    .toggle-group {
-      display: flex;
-      gap: 8px;
-    }
-
-    .btn-toggle {
-      flex: 1;
-      background: #2d3748;
-      border: 1px solid #4a5568;
-      color: #cbd5e0;
-      padding: 10px;
-      font-size: 0.8rem;
-      border-radius: 6px;
-      font-weight: bold;
-      cursor: pointer;
-      transition: all 0.2s;
-      text-align: center;
-    }
-
-    .btn-toggle.active {
-      background: var(--accent-color);
-      color: #fff;
-      border-color: var(--accent-color);
-    }
-
-    .btn-container {
-      display: flex;
-      gap: 15px;
-      margin-top: 20px;
-    }
-
-    .btn {
-      flex: 1;
-      padding: 12px;
-      font-size: 15px;
-      font-weight: bold;
-      border: none;
-      border-radius: 4px;
-      cursor: pointer;
-      text-align: center;
-    }
-
-    .btn-x { background-color: var(--x-color); color: white; text-decoration: none; }
-    .btn-clear { background-color: #e0e0e0; color: #333; }
-
-    .phone-wrapper {
-      position: relative;
-      background: #000;
-      border: 12px solid #2d3748;
-      border-radius: 48px;
-      box-shadow: 0 25px 60px rgba(0,0,0,0.8);
-      overflow: hidden;
-      transition: all 0.3s ease;
-    }
-
-    .phone-wrapper.size-normal { width: 393px; height: 852px; }
-    .phone-wrapper.size-large { width: 430px; height: 932px; }
-
-    .phone-notch {
-      position: absolute;
-      top: 12px;
-      left: 50%;
-      transform: translateX(-50%);
-      width: 110px;
-      height: 30px;
-      background: #000;
-      border-radius: 20px;
-      z-index: 100;
-    }
-
-    .phone-screen {
-      width: 100%;
-      height: 100%;
-      background: #fff;
-      color: #000;
-      overflow-y: auto;
-      overflow-x: hidden;
-      padding: 60px 20px 20px 20px;
-      box-sizing: border-box;
-      position: relative;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      text-align: center;
-    }
-
-    .fold-line {
-      position: absolute;
-      left: 0;
-      width: 100%;
-      border-bottom: 2px dashed #ff4757;
-      z-index: 90;
-      pointer-events: none;
-    }
-    .phone-wrapper.size-normal .fold-line { top: 720px; }
-    .phone-wrapper.size-large .fold-line { top: 780px; }
-
-    .fold-label {
-      position: absolute;
-      right: 10px;
-      background: #ff4757;
-      color: white;
-      font-size: 10px;
-      font-weight: bold;
-      padding: 2px 6px;
-      border-radius: 4px;
-      transform: translateY(-100%);
-    }
-
-    .mirror-main-copy { font-weight: bold; line-height: 1.4; margin-top: 40px; margin-bottom: 15px; word-break: break-all; width: 100%; }
-    .mirror-sub-copy { line-height: 1.5; margin-bottom: 30px; word-break: break-all; width: 100%; }
-    .mirror-cv-btn { display: inline-flex; align-items: center; justify-content: center; width: 100%; font-weight: bold; text-decoration: none; border-radius: 30px; box-shadow: 0 4px 15px rgba(0,0,0,0.2); margin-top: auto; margin-bottom: 20px; word-break: break-all; }
-
-    .count-badge { float: right; font-size: 0.75rem; color: #a0aec0; }
-    .count-badge.alert-red { color: #ff4757; font-weight: bold; }
-
-    .x-follow-badge {
-      display: inline-block;
-      background-color: #1da1f2 !important;
-      color: white !important;
-      text-decoration: none !important;
-      font-weight: bold;
-      font-size: 13px;
-      padding: 10px 24px;
-      border-radius: 20px;
-      margin: 20px 0;
-    }
-
-    .ad-container { width: 100%; max-width: 950px; margin: 30px auto 0 auto; text-align: center; }
-    .ad-label { font-size: 10px; color: #718096; letter-spacing: 1px; margin-bottom: 5px; }
-    .ad-box { background: var(--panel-bg); border: 2px dashed var(--border-color); border-radius: 12px; padding: 20px; color: #a0aec0; font-size: 13px; font-weight: bold; min-height: 60px; display: flex; align-items: center; justify-content: center; box-sizing: border-box; }
-    .disclaimer { width: 100%; max-width: 950px; margin: 20px auto 0 auto; padding: 15px; background: var(--panel-bg); border: 1px solid var(--border-color); border-radius: 12px; font-size: 11px; color: #a0aec0; text-align: left; line-height: 1.6; }
-
-    @media (max-width: 900px) {
-      .container { flex-direction: column; }
-      .phone-wrapper { margin: 0 auto; }
-    }
+    /* ココアさん仕様：PCは真ん中寄せ・スマホは100%フィット */
+    body { font-family: 'Helvetica Neue', Arial, sans-serif; background-color: #f4f7f6; color: #333; margin: 0; padding: 20px; display: flex; justify-content: center; align-items: center; min-height: 100vh; box-sizing: border-box; }
+    .container { max-width: 500px; width: 100%; background: #ffffff; padding: 25px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08); box-sizing: border-box; }
+    h1 { font-size: 1.4rem; text-align: center; color: #0070f3; margin-top: 0; margin-bottom: 5px; }
+    .subtitle { text-align: center; font-size: 0.85rem; color: #666; margin-bottom: 25px; }
+    h2 { font-size: 1.1rem; color: #111; border-left: 4px solid #0070f3; padding-left: 8px; margin-top: 25px; margin-bottom: 15px; }
+    label { font-weight: bold; font-size: 0.85rem; display: block; margin-top: 12px; color: #555; }
+    input, textarea, select { width: 100%; padding: 12px; box-sizing: border-box; border: 1px solid #ccc; border-radius: 6px; font-size: 1rem; margin-top: 6px; background-color: #fafafa; font-family: inherit; }
+    input:focus, textarea:focus, select:focus { border-color: #0070f3; background-color: #fff; outline: none; }
+    .toggle-grid { display: grid; grid-template-columns: repeat(3, 11fr); gap: 8px; margin-top: 6px; }
+    .btn-toggle { padding: 10px; background: #e0e0e0; color: #333; border: none; border-radius: 6px; font-size: 0.85rem; font-weight: bold; cursor: pointer; }
+    .btn-toggle.active { background: #0070f3; color: white; }
+    button.main-btn { width: 100%; padding: 14px; background: #0070f3; color: white; border: none; border-radius: 6px; font-size: 1rem; font-weight: bold; cursor: pointer; margin-top: 18px; transition: background 0.2s; }
+    button.main-btn:hover { background: #0051b3; }
+    
+    /* 📱 内蔵スマホミラー領域 */
+    .phone-wrapper { position: relative; background: #000; border: 10px solid #333; border-radius: 36px; overflow: hidden; margin-top: 20px; width: 100%; height: 500px; box-shadow: inset 0 0 10px rgba(0,0,0,0.5); }
+    .phone-screen { width: 100%; height: 100%; background: #fff; color: #000; padding: 30px 15px 15px 15px; box-sizing: border-box; overflow-y: auto; text-align: center; display: flex; flex-direction: column; align-items: center; }
+    .phone-notch { position: absolute; top: 8px; left: 50%; transform: translateX(-50%); width: 90px; height: 18px; background: #000; border-radius: 10px; z-index: 10; }
+    .fold-line { position: absolute; top: 400px; left: 0; width: 100%; border-bottom: 2px dashed #ff007f; pointer-events: none; z-index: 5; }
+    .fold-label { position: absolute; right: 5px; background: #ff007f; color: white; font-size: 9px; padding: 2px 4px; border-radius: 3px; transform: translateY(-100%); font-weight: bold; }
+    
+    .mirror-main { font-weight: bold; font-size: 1.3rem; margin-top: 20px; line-height: 1.4; word-break: break-all; }
+    .mirror-sub { font-size: 0.9rem; color: #444; margin-top: 10px; line-height: 1.5; word-break: break-all; }
+    .mirror-btn { display: block; width: 90%; padding: 12px; margin-top: auto; margin-bottom: 10px; background: #2ed573; color: white; font-weight: bold; text-decoration: none; border-radius: 25px; font-size: 0.9rem; }
+    
+    .ad-space { margin-top: 30px; padding: 20px 10px; background: #fafafa; border: 2px dashed #ddd; border-radius: 8px; text-align: center; color: #999; font-size: 0.8rem; }
+    .ad-box { width: 100%; height: 90px; display: flex; justify-content: center; align-items: center; background: #eee; color: #777; font-weight: bold; margin-top: 8px; border-radius: 4px; }
+    .disclaimer { font-size: 0.75rem; color: #666; background: #eee; padding: 12px; border-radius: 6px; margin-top: 30px; line-height: 1.5; }
+    .footer-link { text-align: center; margin-top: 25px; font-size: 0.9rem; }
+    .footer-link a { color: #0070f3; text-decoration: none; font-weight: bold; }
   </style>
 </head>
 <body>
 
 <div class="container">
-  <!-- 左側：操作パネルエリア -->
-  <div class="left-panel">
-    <h1>LPファーストビュー・完全フィット検証ミラー</h1>
-    <div class="subtitle">打った文字の「折り返し」「見切れリスク」を実機サイズで3秒検証。</div>
+  <h1>LP検証ミラー</h1>
+  <div class="subtitle">文字の「折り返し」「見切れ」を3秒検証。</div>
 
-    <div class="section-title">📱 デバイス設定</div>
-    <div class="form-group">
-      <label>検証する端末サイズ</label>
-      <div class="toggle-group">
-        <button type="button" id="btn-size-normal" class="btn-toggle active">iPhone (標準)</button>
-        <button type="button" id="btn-size-large" class="btn-toggle">Pro Max / Android (大)</button>
-      </div>
-    </div>
+  <h2>✍️ コピー入力</h2>
+  <label>メインコピー</label>
+  <textarea id="input-main" rows="2" placeholder="例：だるい確定申告を3秒で終わらせる無敵のツール"></textarea>
 
-    <div class="section-title">✍️ コピー入力（リアルタイム同期）</div>
-    <div class="form-group">
-      <label for="input-main-copy">メインコピー <span id="main-counter" class="count-badge">0 / 20文字</span></label>
-      <textarea id="input-main-copy" rows="2" placeholder="例：だるい確定申告を3秒で終わらせる無敵のシミュレーター"></textarea>
-    </div>
-    <div class="form-group">
-      <label for="input-sub-copy">サブコピー</label>
-      <textarea id="input-sub-copy" rows="3" placeholder="例：売上と業種を選ぶだけで「2割特例」と「簡易課税」の納税額を0秒でガチ比較。登録すると年間手取りが何万減るのか一瞬でわかります。"></textarea>
-    </div>
-    <div class="form-group">
-      <label for="input-cv-text">ボタンテキスト</label>
-      <input type="text" id="input-cv-text" placeholder="例：完全無料で一生使う ➔">
-    </div>
+  <label>サブコピー</label>
+  <textarea id="input-sub" rows="3" placeholder="例：総売上と経費を入れるだけで手取りを一瞬で逆算。"></textarea>
 
-    <div class="section-title">🎨 デザイン・レイアウト調整</div>
-    <div class="form-group">
-      <label>検証用フォント種別</label>
-      <div class="toggle-group">
-        <button type="button" id="btn-font-sans" class="btn-toggle active">ゴシック体</button>
-        <button type="button" id="btn-font-serif" class="btn-toggle">明朝体</button>
-        <button type="button" id="btn-font-rounded" class="btn-toggle">丸ゴシック</button>
-      </div>
-    </div>
-    <div class="form-group">
-      <label>文字サイズ（微調整）</label>
-      <div class="toggle-group">
-        <button type="button" id="btn-scale-small" class="btn-toggle">小</button>
-        <button type="button" id="btn-scale-medium" class="btn-toggle active">中（黄金比）</button>
-        <button type="button" id="btn-scale-large" class="btn-toggle">大</button>
-      </div>
-    </div>
-    <div class="form-group">
-      <label>CVボタンアイコン追加</label>
-      <div class="toggle-group">
-        <button type="button" id="btn-icon-none" class="btn-toggle active">なし</button>
-        <button type="button" id="btn-icon-arrow" class="btn-toggle">➔</button>
-        <button type="button" id="btn-icon-cart" class="btn-toggle">🛒</button>
-        <button type="button" id="btn-icon-fire" class="btn-toggle">🔥</button>
-      </div>
-    </div>
-    <div class="form-group">
-      <label>著作権フリー・雰囲気背景パターン</label>
-      <div class="toggle-group">
-        <button type="button" id="btn-bg-white" class="btn-toggle active">単色白</button>
-        <button type="button" id="btn-bg-tech" class="btn-toggle">テック黒</button>
-        <button type="button" id="btn-bg-biz" class="btn-toggle">ビジネス青</button>
-        <button type="button" id="btn-bg-pink" class="btn-toggle">女性向け桃</button>
-      </div>
-    </div>
-    <div class="form-group">
-      <label>CVボタンデザインパターン</label>
-      <div class="toggle-group">
-        <button type="button" id="btn-cv-green" class="btn-toggle active">爆発レモン緑</button>
-        <button type="button" id="btn-cv-orange" class="btn-toggle">情熱オレンジ</button>
-        <button type="button" id="btn-cv-blue" class="btn-toggle">信頼ブルー</button>
-      </div>
-    </div>
+  <label>ボタンテキスト</label>
+  <input type="text" id="input-cv" placeholder="例：完全無料で一生使う ➔">
 
-    <!-- 💡 【新設】実務・効率化ツール用ボタンエリア -->
-    <div class="btn-container">
-      <button class="btn btn-clear" id="clear-storage-btn">記憶クリア</button>
-      <button class="btn btn-x" id="copy-x-btn">進捗をXで報告 📋</button>
+  <h2>🎨 レイアウト設定</h2>
+  <label>検証用フォント</label>
+  <div class="toggle-grid">
+    <button type="button" id="f-sans" class="btn-toggle active">ゴシック</button>
+    <button type="button" id="f-serif" class="btn-toggle">明朝体</button>
+    <button type="button" id="f-round" class="btn-toggle">丸ゴシ</button>
+  </div>
+
+  <h2>📱 スマホ表示ミラー</h2>
+  <div class="phone-wrapper">
+    <div class="phone-notch"></div>
+    <div class="fold-line"><div class="fold-label">ファーストビュー見切れ線</div></div>
+    <div class="phone-screen" id="p-screen">
+      <div class="mirror-main" id="v-main">（メインコピー）</div>
+      <div class="mirror-sub" id="v-sub">（サブコピー）</div>
+      <div class="mirror-btn" id="v-btn">ボタンテキスト</div>
     </div>
   </div>
 
-  <!-- 右側：スマホ完全ミラーエリア -->
-  <div class="right-preview">
-    <div class="phone-wrapper size-normal" id="phone-container">
-      <div class="phone-notch"></div>
-      <div class="fold-line">
-        <div class="fold-label">ファーストビュー見切れ境界線（スクロール不要限界）</div>
-      </div>
-      <div class="phone-screen" id="phone-screen-target">
-        <div class="mirror-main-copy" id="view-main-copy">（メインコピーがここに同期されます）</div>
-        <div class="mirror-sub-copy" id="view-sub-copy">（サブコピーがここに同期されます）</div>
-        <a href="#" class="mirror-cv-btn" id="view-cv-btn">ボタンテキスト</a>
-      </div>
-    </div>
+  <!-- 💡 過去作と100%同じイベント構造を持つ、フリーズゼロの報告ボタン -->
+  <button type="button" id="copyLinkBtn">文章をコピーしてXへ完了報告 📋</button>
+
+  <div class="ad-space">
+    SPONSORED LINK
+    <div class="ad-box">広告掲載スペース（準備中）</div>
+  </div>
+
+  <div class="disclaimer">
+    <strong>【免責事項】</strong><br>
+    本ツールはスマートフォン実機の表示状態をブラウザ上でシミュレートする簡易検証用ミラーです。一般的な標準デバイスの数値を元に算出していますが、ユーザーのスマホOSの文字サイズ設定やブラウザアプリ特有の仕様の違いによって、実際のデバイスでの見え方と差異が生じる場合があります。本ツールでの検証結果に基づいて制作されたLPの成果や不一致について、開発者は一切の責任を負いません。必ず実際のスマホ実機での表示テストを併せて行うようお願いいたします。
+  </div>
+
+  <div class="footer-link">
+    開発者：<a href="https://x.com/cocoa_next7" target="_blank">ココア (@cocoa_next7)</a>
   </div>
 </div>
 
-<!-- 過去作準拠：開発者ココアのX公式リンク看板 -->
-<div style="text-align: center; margin-top: 20px;">
-  <a href="https://x.com/cocoa_next7" target="_blank" class="x-follow-badge">
-    🐦 開発者ココアのX（旧Twitter）をフォローする ➔
-  </a>
-</div>
-
-<!-- 過去作準拠：将来使う広告枠 -->
-<div class="ad-container">
-  <div class="ad-label">SPONSORED</div>
-  <div class="ad-box"><p>【ここに将来の広告や自作アプリのバナーを表示】</p></div>
-</div>
-
-<!-- 過去作準拠：誠実な免責事項 -->
-<div class="disclaimer">
-  <strong>【免責事項】</strong><br>
-  本ツールはスマートフォン実機の表示状態をブラウザ上でシミュレートする簡易検証用ミラーです。文字の折り返しや見切れ線（The Fold）の基準位置は一般的な標準デバイス（CSSピクセルベース）の数値を元に算出していますが、ユーザーが使用するスマホOSの文字サイズ拡大設定、ブラウザアプリ特有のツールバーの高さ、および採用するWEBフォントのレンダリング環境の違いによって、実際のデバイスでの見え方と数ピクセル単位の差異が生じる場合があります。本ツールでの検証結果に基づいて制作されたLPの成果、見栄えの不一致、およびこれらに起因する商業上の不利益について、開発者は一切の責任を負いません。最終的なFVデザインの確定にあたっては、必ず実際のスマホ実機複数台での表示テストを併せて行うようお願いいたします。
-</div>
 <script>
   document.addEventListener("DOMContentLoaded", function() {
-    // 操作パネルの要素取得
-    const mainInput = document.getElementById("input-main-copy");
-    const subInput = document.getElementById("input-sub-copy");
-    const cvInput = document.getElementById("input-cv-text");
-    const mainCounter = document.getElementById("main-counter");
+    var inMain = document.getElementById('input-main'), inSub = document.getElementById('input-sub'), inCv = document.getElementById('input-cv'), vMain = document.getElementById('v-main'), vSub = document.getElementById('v-sub'), vBtn = document.getElementById('v-btn'), pScreen = document.getElementById('p-screen'), copyLinkBtn = document.getElementById('copyLinkBtn');
+    var fSans = document.getElementById('f-sans'), fSerif = document.getElementById('f-serif'), fRound = document.getElementById('f-round');
 
-    // ミラー側の要素取得
-    const phoneContainer = document.getElementById("phone-container");
-    const phoneScreen = document.getElementById("phone-screen-target");
-    const viewMain = document.getElementById("view-main-copy");
-    const viewSub = document.getElementById("view-sub-copy");
-    const viewCvBtn = document.getElementById("view-cv-btn");
-
-    const clearStorageBtn = document.getElementById("clear-storage-btn");
-    const copyXBtn = document.getElementById("copy-x-btn");
-
-    // 状態管理変数
-    let currentFont = "sans";
-    let currentScale = "medium";
-    let currentIcon = "none";
-    let currentBg = "white";
-    let currentCvColor = "green";
-
-    // 1. リアルタイム文字入力・反映ロジック
-    function syncText() {
-      const mainText = mainInput ? mainInput.value : "";
-      const subText = subInput ? subInput.value : "";
-      const cvText = cvInput ? cvInput.value : "ボタンテキスト";
-
-      if (viewMain) {
-        viewMain.innerText = mainText || "（メインコピーがここに同期されます）";
-      }
-      if (mainCounter) {
-        const len = mainText.length;
-        mainCounter.innerText = len + " / 20文字";
-        if (len > 20) {
-          mainCounter.className = "count-badge alert-red";
-        } else {
-          mainCounter.className = "count-badge";
-        }
-      }
-
-      if (viewSub) {
-        viewSub.innerText = subText || "（サブコピーがここに同期されます）";
-      }
-
-      if (viewCvBtn) {
-        let iconChar = "";
-        if (currentIcon === "arrow") iconChar = " ➔";
-        if (currentIcon === "cart") iconChar = " 🛒";
-        if (currentIcon === "fire") iconChar = " 🔥";
-        viewCvBtn.innerText = cvText + iconChar;
-      }
+    function sync() {
+      if(vMain) vMain.innerText = inMain.value || "（メインコピー）";
+      if(vSub) vSub.innerText = inSub.value || "（サブコピー）";
+      if(vBtn) vBtn.innerText = inCv.value || "ボタンテキスト";
     }
+    [inMain, inSub, inCv].forEach(function(el) { if(el) el.addEventListener('input', sync); });
 
-    // 2. スマホ枠内の見た目（CSS）を完全一括制御する反映エンジン
-    function updateStyle() {
-      if (!phoneScreen || !viewMain || !viewSub || !viewCvBtn) return;
+    if(fSans) fSans.onclick = function() { this.className="btn-toggle active"; fSerif.className="btn-toggle"; fRound.className="btn-toggle"; pScreen.style.fontFamily="sans-serif"; };
+    if(fSerif) fSerif.onclick = function() { this.className="btn-toggle active"; fSans.className="btn-toggle"; fRound.className="btn-toggle"; pScreen.style.fontFamily="serif"; };
+    if(fRound) fRound.onclick = function() { this.className="btn-toggle active"; fSans.className="btn-toggle"; fSerif.className="btn-toggle"; pScreen.style.fontFamily="'M PLUS Rounded 1c', sans-serif"; };
 
-      if (currentFont === "serif") {
-        phoneScreen.style.fontFamily = "'Noto Serif JP', 'Hiragino Mincho ProN', serif";
-      } else if (currentFont === "rounded") {
-        phoneScreen.style.fontFamily = "'M PLUS Rounded 1c', sans-serif";
-      } else {
-        phoneScreen.style.fontFamily = "'Helvetica Neue', Arial, sans-serif";
-      }
+    // 💡 過去のコードを1文字ずつ完全参考。100%確実にエラーなく動くコピー処理
+    if (copyLinkBtn) {
+      copyLinkBtn.addEventListener("click", function() {
+        var textToCopy = "【LPファーストビューを検証しました！】\nメインコピー: " + (inMain.value || "未入力") + "\nスマホ完全フィット検証ミラー「lp-fv-mirror」で文字見切れを防ぐ🔥";
+        if (!textToCopy) return;
 
-      if (currentScale === "small") {
-        viewMain.style.fontSize = "20px"; viewSub.style.fontSize = "12px"; viewCvBtn.style.padding = "10px 15px"; viewCvBtn.style.fontSize = "13px";
-      } else if (currentScale === "large") {
-        viewMain.style.fontSize = "28px"; viewSub.style.fontSize = "16px"; viewCvBtn.style.padding = "16px 25px"; viewCvBtn.style.fontSize = "17px";
-      } else {
-        viewMain.style.fontSize = "24px"; viewSub.style.fontSize = "14px"; viewCvBtn.style.padding = "14px 20px"; viewCvBtn.style.fontSize = "15px";
-      }
-
-      if (currentBg === "tech") {
-        phoneScreen.style.background = "linear-gradient(135deg, #0f2027, #203a43, #2c5364)";
-        phoneScreen.style.color = "#ffffff";
-        viewMain.style.color = "#00f2fe";
-        viewSub.style.color = "#cbd5e0";
-      } else if (currentBg === "biz") {
-        phoneScreen.style.background = "linear-gradient(180deg, #1e3c72 0%, #2a5298 100%)";
-        phoneScreen.style.color = "#ffffff";
-        viewMain.style.color = "#fff";
-        viewSub.style.color = "#e2e8f0";
-      } else if (currentBg === "pink") {
-        phoneScreen.style.background = "linear-gradient(120deg, #fdfbfb 0%, #ebedee 100%)";
-        phoneScreen.style.color = "#333333";
-        viewMain.style.color = "#d63031";
-        viewSub.style.color = "#555555";
-      } else {
-        phoneScreen.style.background = "#ffffff";
-        phoneScreen.style.color = "#000000";
-        viewMain.style.color = "#000000";
-        viewSub.style.color = "#333333";
-      }
-
-      if (currentCvColor === "orange") {
-        viewCvBtn.style.background = "linear-gradient(90deg, #ff8c00, #e52d27)"; viewCvBtn.style.color = "#fff";
-      } else if (currentCvColor === "blue") {
-        viewCvBtn.style.background = "linear-gradient(90deg, #00c6ff, #0072ff)"; viewCvBtn.style.color = "#fff";
-      } else {
-        viewCvBtn.style.background = "linear-gradient(90deg, #11998e, #38ef7d)"; viewCvBtn.style.color = "#fff";
-      }
-      
-      syncText();
-    }
-
-    // 3. トグルボタンの連動イベント設定関数
-    function setupToggle(btnIdPrefix, callback) {
-      const buttons = document.querySelectorAll(`[id^="${btnIdPrefix}"]`);
-      buttons.forEach(btn => {
-        btn.addEventListener("click", function() {
-          buttons.forEach(b => b.classList.remove("active"));
-          this.classList.add("active");
-          callback(this.id.replace(btnIdPrefix, ""));
-        });
-      });
-    }
-
-    setupToggle("btn-size-", function(val) {
-      if (!phoneContainer) return;
-      if (val === "large") {
-        phoneContainer.className = "phone-wrapper size-large";
-      } else {
-        phoneContainer.className = "phone-wrapper size-normal";
-      }
-    });
-
-    setupToggle("btn-font-", function(val) { currentFont = val; updateStyle(); });
-    setupToggle("btn-scale-", function(val) { currentScale = val; updateStyle(); });
-    setupToggle("btn-icon-", function(val) { currentIcon = val; updateStyle(); });
-    setupToggle("btn-bg-", function(val) { currentBg = val; updateStyle(); });
-    setupToggle("btn-cv-", function(val) { currentCvColor = val; updateStyle(); });
-
-    [mainInput, subInput, cvInput].forEach(inp => {
-      if (inp) inp.addEventListener("input", syncText);
-    });
-       // 💡 過去作ベース：コピー完了アニメーションの直後にXへ自動ジャンプする完全版
-    if (copyXBtn) {
-      copyXBtn.style.display = "block";
-      copyXBtn.addEventListener("click", () => {
-        var sizeEl = document.querySelector('[id^="btn-size-"].active');
-        var sizeName = sizeEl ? (sizeEl.innerText || "標準") : "標準";
-        var txt = mainInput ? (mainInput.value || "案件") : "案件";
-        
-        // 過去作と同じ文章組み立て
-        var textToCopy = "【" + sizeName + "サイズでLPファーストビューを検証しました！】\nメインコピー: " + txt + "\nスマホ完全フィット検証ミラー「lp-fv-mirror」で3秒で文字見切れを防ぐ🔥";
-
-        // 1. 最優先でクリップボードへコピーを実行
-        navigator.clipboard.writeText(textToCopy).then(() => {
-          // 2. 過去作と100%同じ文字と色の切り替え
-          copyXBtn.textContent = "コピー完了！そのままX等の画面へ貼れます✅";
-          copyXBtn.style.backgroundColor = "#2ed573";
+        navigator.clipboard.writeText(textToCopy).then(function() {
+          copyLinkBtn.textContent = "コピー完了！そのままX等の画面へ貼れます✅";
+          copyLinkBtn.style.backgroundColor = "#2ed573";
           
-          // 3. コピー完了の文字が出た瞬間に、ポップアップブロックを回避してXを開く
-          window.open('https://twitter.com' + encodeURIComponent(textToCopy), '_blank');
-          
-          // 4. 2秒後にボタンを元の青色に戻す
-          setTimeout(() => {
-            copyXBtn.textContent = "文章をコピーしてXへ完了報告 📋";
-            copyXBtn.style.backgroundColor = "#1da1f2";
+          setTimeout(function() {
+            copyLinkBtn.textContent = "文章をコピーしてXへ完了報告 📋";
+            copyLinkBtn.style.backgroundColor = "#0070f3";
           }, 2000);
-        }).catch(() => {
+        }).catch(function() {
           console.log("コピーエラー");
         });
       });
     }
-
-    // 記憶クリア処理
-    if (clearStorageBtn) {
-      clearStorageBtn.onclick = function() {
-        if(confirm('入力内容を完全にリセットしますか？')) {
-          if (mainInput) mainInput.value = '';
-          if (subInput) subInput.value = '';
-          if (cvInput) cvInput.value = '';
-          updateStyle();
-        }
-      };
-    }
-
-    // 初回起動
-    updateStyle();
   });
 </script>
 </body>

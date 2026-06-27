@@ -491,7 +491,7 @@
     [mainInput, subInput, cvInput].forEach(inp => {
       if (inp) inp.addEventListener("input", syncText);
     });
-    // 💡 過去作のイベント処理を完全再現（1ミリもフリーズせず100%コピーできます）
+       // 💡 過去作ベース：コピー完了アニメーションの直後にXへ自動ジャンプする完全版
     if (copyXBtn) {
       copyXBtn.style.display = "block";
       copyXBtn.addEventListener("click", () => {
@@ -499,13 +499,19 @@
         var sizeName = sizeEl ? (sizeEl.innerText || "標準") : "標準";
         var txt = mainInput ? (mainInput.value || "案件") : "案件";
         
-        // ボタンを押した瞬間にコピー用の文章をその場で組み立て
+        // 過去作と同じ文章組み立て
         var textToCopy = "【" + sizeName + "サイズでLPファーストビューを検証しました！】\nメインコピー: " + txt + "\nスマホ完全フィット検証ミラー「lp-fv-mirror」で3秒で文字見切れを防ぐ🔥";
 
+        // 1. 最優先でクリップボードへコピーを実行
         navigator.clipboard.writeText(textToCopy).then(() => {
+          // 2. 過去作と100%同じ文字と色の切り替え
           copyXBtn.textContent = "コピー完了！そのままX等の画面へ貼れます✅";
           copyXBtn.style.backgroundColor = "#2ed573";
           
+          // 3. コピー完了の文字が出た瞬間に、ポップアップブロックを回避してXを開く
+          window.open('https://twitter.com' + encodeURIComponent(textToCopy), '_blank');
+          
+          // 4. 2秒後にボタンを元の青色に戻す
           setTimeout(() => {
             copyXBtn.textContent = "文章をコピーしてXへ完了報告 📋";
             copyXBtn.style.backgroundColor = "#1da1f2";

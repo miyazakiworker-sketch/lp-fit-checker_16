@@ -164,9 +164,19 @@
 </div>
 <script>
   document.addEventListener("DOMContentLoaded", function() {
-    var inMain = document.getElementById('input-main'), inSub = document.getElementById('input-sub'), inCv = document.getElementById('input-cv'), vMain = document.getElementById('v-main'), vSub = document.getElementById('v-sub'), vBtn = document.getElementById('v-btn'), mainCounter = document.getElementById('main-counter'), pScreen = document.getElementById('p-screen'), phoneContainer = document.getElementById('phone-container'), copyLinkBtn = document.getElementById('copyLinkBtn'), clearStorageBtn = document.getElementById('clearStorageBtn');
+    var inMain = document.getElementById('input-main'), inSub = document.getElementById('input-sub'), inCv = document.getElementById('input-cv'), vMain = document.getElementById('v-main'), vSub = document.getElementById('v-sub'), vBtn = document.getElementById('v-btn'), mainCounter = document.getElementById('main-counter'), pScreen = document.getElementById('p-screen');
 
-    // 💡 エラーの原因だった複雑なトグルイベント群を完全消去。フリーズを物理的に根絶
+    // 💡 IDがズレていても「Xで報告」という文字が入ったボタンを画面内から強制探索
+    var copyLinkBtn = document.getElementById('copyLinkBtn');
+    if (!copyLinkBtn) {
+      var allButtons = document.querySelectorAll('button, a');
+      allButtons.forEach(function(btn) {
+        if (btn.innerText && (btn.innerText.indexOf('X') !== -1 || btn.innerText.indexOf('報告') !== -1)) {
+          copyLinkBtn = btn;
+        }
+      });
+    }
+
     function sync() {
       var mainText = inMain ? inMain.value : "", subText = inSub ? inSub.value : "", cvText = inCv ? inCv.value : "ボタンテキスト";
       if (vMain) vMain.innerText = mainText || "（メインコピー）";
@@ -174,7 +184,7 @@
       if (vBtn) vBtn.innerText = cvText;
       if (mainCounter) { var len = mainText.length; mainCounter.innerText = len + " / 20文字"; mainCounter.className = len > 20 ? "count-badge alert-red" : "count-badge"; }
       
-      // 💡 【一回成功した無敵の仕組み】入力と同時に、直リンクaタグのhrefをリアルタイムで直接更新
+      // 💡 入力と同時に、見つかったボタンのhref（リンク先）をリアルタイムで直接更新
       if(copyLinkBtn) {
         var txt = mainText || "未入力";
         var textToCopy = "【LPファーストビューを検証しました！】\nメインコピー: " + txt + "\nスマホ完全フィット検証ミラー「lp-fv-mirror」で文字見切れを防ぐ🔥";
@@ -183,11 +193,13 @@
     }
     [inMain, inSub, inCv].forEach(function(el) { if(el) el.addEventListener('input', sync); });
 
-    // 💡 フォント切り替えは標準フォント（明朝・ゴシック）のみを最速で切り替え
-    document.getElementById('f-sans').onclick = function() { pScreen.style.fontFamily = "sans-serif"; };
-    document.getElementById('f-serif').onclick = function() { pScreen.style.fontFamily = "serif"; };
-    document.getElementById('f-round').onclick = function() { pScreen.style.fontFamily = "fantasy, sans-serif"; }; // 丸ゴシの代わり
+    // 💡 フォント切り替えはエラーを起こさないように要素の存在チェック付きで処理
+    var fSans = document.getElementById('f-sans'), fSerif = document.getElementById('f-serif'), fRound = document.getElementById('f-round');
+    if (fSans) fSans.onclick = function() { if (pScreen) pScreen.style.fontFamily = "sans-serif"; };
+    if (fSerif) fSerif.onclick = function() { if (pScreen) pScreen.style.fontFamily = "serif"; };
+    if (fRound) fRound.onclick = function() { if (pScreen) pScreen.style.fontFamily = "fantasy, sans-serif"; };
 
+    var clearStorageBtn = document.getElementById('clearStorageBtn');
     if (clearStorageBtn) {
       clearStorageBtn.onclick = function() {
         if(confirm('リセットしますか？')) { if (inMain) inMain.value = ''; if (inSub) inSub.value = ''; if (inCv) inCv.value = ''; sync(); }

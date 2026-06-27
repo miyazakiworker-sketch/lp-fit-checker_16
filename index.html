@@ -1,0 +1,492 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>LPファーストビュー・完全フィット検証ミラー</title>
+  <style>
+    /* ココアさん標準：極上の黒モード・完全ボックスモデル */
+    :root {
+      --bg-color: #0d0f12;
+      --panel-bg: #1a1f26;
+      --text-color: #e2e8f0;
+      --accent-color: #3182ce;
+      --border-color: #2d3748;
+      --input-bg: #2d3748;
+    }
+
+    body {
+      background-color: var(--bg-color);
+      font-family: 'Helvetica Neue', Arial, 'Hiragino Kaku Gothic ProN', sans-serif;
+      color: var(--text-color);
+      margin: 0;
+      padding: 20px;
+      box-sizing: border-box;
+    }
+
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      display: flex;
+      gap: 30px;
+    }
+
+    /* 左右のレイアウト調整（PC時は綺麗に分割、スマホ時は縦並び） */
+    .left-panel {
+      flex: 1;
+      background: var(--panel-bg);
+      padding: 25px;
+      border-radius: 16px;
+      border: 1px solid var(--border-color);
+      box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+    }
+
+    .right-preview {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: flex-start;
+    }
+
+    h1 {
+      font-size: 1.4rem;
+      color: #fff;
+      margin: 0 0 5px 0;
+      text-align: left;
+    }
+
+    .subtitle {
+      font-size: 0.85rem;
+      color: #a0aec0;
+      margin-bottom: 25px;
+      text-align: left;
+    }
+
+    .section-title {
+      font-size: 0.95rem;
+      font-weight: bold;
+      color: #fff;
+      margin: 20px 0 10px 0;
+      border-left: 3px solid var(--accent-color);
+      padding-left: 8px;
+    }
+
+    .form-group {
+      margin-bottom: 15px;
+    }
+
+    label {
+      display: block;
+      font-size: 0.8rem;
+      color: #cbd5e0;
+      margin-bottom: 6px;
+      font-weight: bold;
+    }
+
+    input, textarea, select {
+      width: 100%;
+      background: var(--input-bg);
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      padding: 10px 12px;
+      color: #fff;
+      font-size: 0.9rem;
+      box-sizing: border-box;
+    }
+
+    input:focus, textarea:focus, select:focus {
+      outline: none;
+      border-color: var(--accent-color);
+    }
+
+    /* 横並びボタンやピッカー用のロウ */
+    .flex-row {
+      display: flex;
+      gap: 10px;
+    }
+
+    .flex-row > div {
+      flex: 1;
+    }
+
+    /* 迷わせない直感トグルボタン */
+    .toggle-group {
+      display: flex;
+      gap: 8px;
+    }
+
+    .btn-toggle {
+      flex: 1;
+      background: #2d3748;
+      border: 1px solid #4a5568;
+      color: #cbd5e0;
+      padding: 10px;
+      font-size: 0.8rem;
+      border-radius: 6px;
+      font-weight: bold;
+      cursor: pointer;
+      transition: all 0.2s;
+      text-align: center;
+    }
+
+    .btn-toggle.active {
+      background: var(--accent-color);
+      color: #fff;
+      border-color: var(--accent-color);
+    }
+
+    /* 📱 ギミック満載の無敵のスマホモックアップ */
+    .phone-wrapper {
+      position: relative;
+      background: #000;
+      border: 12px solid #2d3748; /* 高級感あるベゼル枠 */
+      border-radius: 48px;
+      box-shadow: 0 25px 60px rgba(0,0,0,0.8);
+      overflow: hidden;
+      transition: all 0.3s ease;
+    }
+
+    /* 客がサイズを選べる可変ギミック（基本サイズはiPhone標準） */
+    .phone-wrapper.size-normal { width: 393px; height: 852px; }
+    .phone-wrapper.size-large { width: 430px; height: 932px; }
+
+    /* ダイナミックアイランド風ノッチ（リアルさを追求） */
+    .phone-notch {
+      position: absolute;
+      top: 12px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 110px;
+      height: 30px;
+      background: #000;
+      border-radius: 20px;
+      z-index: 100;
+    }
+
+    /* LPが実際に描画されるスクロールエリア */
+    .phone-screen {
+      width: 100%;
+      height: 100%;
+      background: #fff; /* デフォルト背景 */
+      color: #000;
+      overflow-y: auto;
+      overflow-x: hidden;
+      padding: 60px 20px 20px 20px;
+      box-sizing: border-box;
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+    }
+
+    /* ⚠️ 運命を分ける「見切れ点線」システム */
+    .fold-line {
+      position: absolute;
+      left: 0;
+      width: 100%;
+      border-bottom: 2px dashed #ff4757;
+      z-index: 90;
+      pointer-events: none;
+    }
+    /* 標準サイズ時は上から720px付近、大画面時は780px付近がスクロール不要限界値 */
+    .phone-wrapper.size-normal .fold-line { top: 720px; }
+    .phone-wrapper.size-large .fold-line { top: 780px; }
+
+    .fold-label {
+      position: absolute;
+      right: 10px;
+      background: #ff4757;
+      color: white;
+      font-size: 10px;
+      font-weight: bold;
+      padding: 2px 6px;
+      border-radius: 4px;
+      transform: translateY(-100%);
+    }
+
+    /* 🔮 ミラーリングされるLPパーツのCSS群 */
+    .mirror-main-copy { font-weight: bold; line-height: 1.4; margin-top: 40px; margin-bottom: 15px; word-break: break-all; width: 100%; }
+    .mirror-sub-copy { line-height: 1.5; margin-bottom: 30px; word-break: break-all; width: 100%; }
+    .mirror-cv-btn { display: inline-flex; align-items: center; justify-content: center; width: 100%; font-weight: bold; text-decoration: none; border-radius: 30px; box-shadow: 0 4px 15px rgba(0,0,0,0.2); transition: transform 0.1s; margin-top: auto; margin-bottom: 20px; word-break: break-all; }
+
+    /* 文字数カウンターのアラート状態 */
+    .count-badge { float: right; font-size: 0.75rem; color: #a0aec0; }
+    .count-badge.alert-red { color: #ff4757; font-weight: bold; }
+
+    /* 将来使う広告枠 & 誠実な免責事項（過去作の無敵配置） */
+    .ad-container { width: 100%; max-width: 950px; margin: 30px auto 0 auto; text-align: center; }
+    .ad-label { font-size: 10px; color: #718096; letter-spacing: 1px; margin-bottom: 5px; }
+    .ad-box { background: var(--panel-bg); border: 2px dashed var(--border-color); border-radius: 12px; padding: 20px; color: #a0aec0; font-size: 13px; font-weight: bold; min-height: 60px; display: flex; align-items: center; justify-content: center; box-sizing: border-box; }
+    .disclaimer { width: 100%; max-width: 950px; margin: 20px auto 0 auto; padding: 15px; background: var(--panel-bg); border: 1px solid var(--border-color); border-radius: 12px; font-size: 11px; color: #a0aec0; text-align: left; line-height: 1.6; }
+
+    /* スマホ表示のレスポンシブ対応 */
+    @media (max-width: 900px) {
+      .container { flex-direction: column; }
+      .phone-wrapper { margin: 0 auto; }
+    }
+  </style>
+</head>
+<body>
+
+<div class="container">
+  <!-- 左側：操作パネルエリア（PC時は左、スマホ時は上） -->
+  <div class="left-panel">
+    <h1>LPファーストビュー・完全フィット検証ミラー</h1>
+    <div class="subtitle">打った文字の「折り返し」「見切れリスク」を実機サイズで3秒検証。</div>
+
+    <div class="section-title">📱 デバイス設定</div>
+    <div class="form-group">
+      <label>検証する端末サイズ</label>
+      <div class="toggle-group">
+        <button type="button" id="btn-size-normal" class="btn-toggle active">iPhone (標準)</button>
+        <button type="button" id="btn-size-large" class="btn-toggle">Pro Max / Android (大)</button>
+      </div>
+    </div>
+
+    <div class="section-title">✍️ コピー入力（リアルタイム同期）</div>
+    <div class="form-group">
+      <label for="input-main-copy">メインコピー <span id="main-counter" class="count-badge">0 / 20文字</span></label>
+      <textarea id="input-main-copy" rows="2" placeholder="例：だるい確定申告を3秒で終わらせる無敵のシミュレーター"></textarea>
+    </div>
+    <div class="form-group">
+      <label for="input-sub-copy">サブコピー</label>
+      <textarea id="input-sub-copy" rows="3" placeholder="例：売上と業種を選ぶだけで「2割特例」と「簡易課税」の納税額を0秒でガチ比較。登録すると年間手取りが何万減るのか一瞬でわかります。"></textarea>
+    </div>
+    <div class="form-group">
+      <label for="input-cv-text">ボタンテキスト</label>
+      <input type="text" id="input-cv-text" placeholder="例：完全無料で一生使う ➔">
+    </div>
+
+    <div class="section-title">🎨 デザイン・レイアウト調整</div>
+    <div class="form-group">
+      <label>検証用フォント種別</label>
+      <div class="toggle-group">
+        <button type="button" id="btn-font-sans" class="btn-toggle active">ゴシック体</button>
+        <button type="button" id="btn-font-serif" class="btn-toggle">明朝体</button>
+        <button type="button" id="btn-font-rounded" class="btn-toggle">丸ゴシック</button>
+      </div>
+    </div>
+    <div class="form-group">
+      <label>文字サイズ（微調整）</label>
+      <div class="toggle-group">
+        <button type="button" id="btn-scale-small" class="btn-toggle">小</button>
+        <button type="button" id="btn-scale-medium" class="btn-toggle active">中（黄金比）</button>
+        <button type="button" id="btn-scale-large" class="btn-toggle">大</button>
+      </div>
+    </div>
+    <div class="form-group">
+      <label>CVボタンアイコン追加</label>
+      <div class="toggle-group">
+        <button type="button" id="btn-icon-none" class="btn-toggle active">なし</button>
+        <button type="button" id="btn-icon-arrow" class="btn-toggle">➔</button>
+        <button type="button" id="btn-icon-cart" class="btn-toggle">🛒</button>
+        <button type="button" id="btn-icon-fire" class="btn-toggle">🔥</button>
+      </div>
+    </div>
+    <div class="form-group">
+      <label>著作権フリー・雰囲気背景パターン</label>
+      <div class="toggle-group">
+        <button type="button" id="btn-bg-white" class="btn-toggle active">単色白</button>
+        <button type="button" id="btn-bg-tech" class="btn-toggle">テック黒</button>
+        <button type="button" id="btn-bg-biz" class="btn-toggle">ビジネス青</button>
+        <button type="button" id="btn-bg-pink" class="btn-toggle">女性向け桃</button>
+      </div>
+    </div>
+    <div class="form-group">
+      <label>CVボタンデザインパターン</label>
+      <div class="toggle-group">
+        <button type="button" id="btn-cv-green" class="btn-toggle active">爆発レモン緑</button>
+        <button type="button" id="btn-cv-orange" class="btn-toggle">情熱オレンジ</button>
+        <button type="button" id="btn-cv-blue" class="btn-toggle">信頼ブルー</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 右側：スマホ完全ミラーエリア（PC時は右、スマホ時は下） -->
+  <div class="right-preview">
+    <div class="phone-wrapper size-normal" id="phone-container">
+      <!-- リアルなアイランド風ノッチ -->
+      <div class="phone-notch"></div>
+      
+      <!-- 運命を分ける見切れスクロール限界線 -->
+      <div class="fold-line">
+        <span class="fold-line-inner"></span>
+        <div class="fold-label">ファーストビュー見切れ境界線（スクロール不要限界）</div>
+      </div>
+      
+      <!-- リアルタイムでLPが組み立てられる画面内部 -->
+      <div class="phone-screen" id="phone-screen-target">
+        <div class="mirror-main-copy" id="view-main-copy">（メインコピーがここに同期されます）</div>
+        <div class="mirror-sub-copy" id="view-sub-copy">（サブコピーがここに同期されます）</div>
+        <a href="#" class="mirror-cv-btn" id="view-cv-btn">ボタンテキスト</a>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- 過去作準拠：将来使う広告枠（PC・スマホ通常画面の一番下に綺麗に配置） -->
+<div class="ad-container">
+  <div class="ad-label">SPONSORED</div>
+  <div class="ad-box"><p>【ここに将来の広告や自作アプリのバナーを表示】</p></div>
+</div>
+
+<!-- 過去作準拠：誠実な免責事項（フリーランス実務用の文面） -->
+<div class="disclaimer">
+  <strong>【免責事項】</strong><br>
+  本ツールはスマートフォン実機の表示状態をブラウザ上でシミュレートする簡易検証用ミラーです。文字の折り返しや見切れ線（The Fold）の基準位置は一般的な標準デバイス（CSSピクセルベース）の数値を元に算出していますが、ユーザーが使用するスマホOSの文字サイズ拡大設定、ブラウザアプリ特有のツールバーの高さ、および採用するWEBフォントのレンダリング環境の違いによって、実際のデバイスでの見え方と数ピクセル単位の差異が生じる場合があります。本ツールでの検証結果に基づいて制作されたLPの成果、見栄えの不一致、およびこれらに起因する商業上の不利益について、開発者は一切の責任を負いません。最終的なFVデザインの確定にあたっては、必ず実際のスマホ実機複数台での表示テストを併せて行うようお願いいたします。
+</div>
+<script>
+  document.addEventListener("DOMContentLoaded", function() {
+    // 操作パネルの要素取得
+    const mainInput = document.getElementById("input-main-copy");
+    const subInput = document.getElementById("input-sub-copy");
+    const cvInput = document.getElementById("input-cv-text");
+    const mainCounter = document.getElementById("main-counter");
+
+    // ミラー側の要素取得
+    const phoneContainer = document.getElementById("phone-container");
+    const phoneScreen = document.getElementById("phone-screen-target");
+    const viewMain = document.getElementById("view-main-copy");
+    const viewSub = document.getElementById("view-sub-copy");
+    const viewCvBtn = document.getElementById("view-cv-btn");
+
+    // 状態管理変数
+    let currentFont = "sans";
+    let currentScale = "medium";
+    let currentIcon = "none";
+    let currentBg = "white";
+    let currentCvColor = "green";
+
+    // 1. リアルタイム文字入力・反映ロジック（エラーガード句付き）
+    function syncText() {
+      const mainText = mainInput ? mainInput.value : "";
+      const subText = subInput ? subInput.value : "";
+      const cvText = cvInput ? cvInput.value : "ボタンテキスト";
+
+      // メインコピー同期 & 文字数カウンター警告システム
+      if (viewMain) {
+        viewMain.innerText = mainText || "（メインコピーがここに同期されます）";
+      }
+      if (mainCounter) {
+        const len = mainText.length;
+        mainCounter.innerText = len + " / 20文字";
+        if (len > 20) {
+          mainCounter.className = "count-badge alert-red"; // 20文字超えで赤文字警告
+        } else {
+          mainCounter.className = "count-badge";
+        }
+      }
+
+      // サブコピー同期
+      if (viewSub) {
+        viewSub.innerText = subText || "（サブコピーがここに同期されます）";
+      }
+
+      // CVボタンテキスト + アイコン合成同期
+      if (viewCvBtn) {
+        let iconChar = "";
+        if (currentIcon === "arrow") iconChar = " ➔";
+        if (currentIcon === "cart") iconChar = " 🛒";
+        if (currentIcon === "fire") iconChar = " 🔥";
+        viewCvBtn.innerText = cvText + iconChar;
+      }
+    }
+
+    // 2. スマホ枠内の見た目（CSS）を完全一括制御する反映エンジン
+    function updateStyle() {
+      if (!phoneScreen || !viewMain || !viewSub || !viewCvBtn) return;
+
+      // フォント切り替えの適用
+      if (currentFont === "serif") {
+        phoneScreen.style.fontFamily = "'Noto Serif JP', 'Hiragino Mincho ProN', serif";
+      } else if (currentFont === "rounded") {
+        phoneScreen.style.fontFamily = "'M PLUS Rounded 1c', sans-serif";
+      } else {
+        phoneScreen.style.fontFamily = "'Helvetica Neue', Arial, 'Hiragino Kaku Gothic ProN', sans-serif";
+      }
+
+      // 文字サイズ（大中小トグル）の微調整適用
+      if (currentScale === "small") {
+        viewMain.style.fontSize = "20px"; viewSub.style.fontSize = "12px"; viewCvBtn.style.padding = "10px 15px"; viewCvBtn.style.fontSize = "13px";
+      } else if (currentScale === "large") {
+        viewMain.style.fontSize = "28px"; viewSub.style.fontSize = "16px"; viewCvBtn.style.padding = "16px 25px"; viewCvBtn.style.fontSize = "17px";
+      } else {
+        viewMain.style.fontSize = "24px"; viewSub.style.fontSize = "14px"; viewCvBtn.style.padding = "14px 20px"; viewCvBtn.style.fontSize = "15px";
+      }
+
+      // 著作権完全フリー・CSSグラデーション背景システム
+      if (currentBg === "tech") {
+        phoneScreen.style.background = "linear-gradient(135deg, #0f2027, #203a43, #2c5364)";
+        phoneScreen.style.color = "#ffffff";
+        viewMain.style.color = "#00f2fe"; // 近未来ネオンブルー
+        viewSub.style.color = "#cbd5e0";
+      } else if (currentBg === "biz") {
+        phoneScreen.style.background = "linear-gradient(180deg, #1e3c72 0%, #2a5298 100%)";
+        phoneScreen.style.color = "#ffffff";
+        viewMain.style.color = "#fff";
+        viewSub.style.color = "#e2e8f0";
+      } else if (currentBg === "pink") {
+        phoneScreen.style.background = "linear-gradient(120deg, #fdfbfb 0%, #ebedee 100%)";
+        phoneScreen.style.color = "#333333";
+        viewMain.style.color = "#d63031"; // 華やかなピンクレッド
+        viewSub.style.color = "#555555";
+      } else {
+        phoneScreen.style.background = "#ffffff";
+        phoneScreen.style.color = "#000000";
+        viewMain.style.color = "#000000";
+        viewSub.style.color = "#333333";
+      }
+
+      // CVボタンデザインパターン適用
+      if (currentCvColor === "orange") {
+        viewCvBtn.style.background = "linear-gradient(90deg, #ff8c00, #e52d27)"; viewCvBtn.style.color = "#fff";
+      } else if (currentCvColor === "blue") {
+        viewCvBtn.style.background = "linear-gradient(90deg, #00c6ff, #0072ff)"; viewCvBtn.style.color = "#fff";
+      } else {
+        viewCvBtn.style.background = "linear-gradient(90deg, #11998e, #38ef7d)"; viewCvBtn.style.color = "#fff"; // 爆発レモン緑
+      }
+      
+      syncText();
+    }
+
+    // 3. 迷わせない直感トグルボタンの連動イベント設定関数
+    function setupToggle(btnIdPrefix, callback) {
+      const buttons = document.querySelectorAll(`[id^="${btnIdPrefix}"]`);
+      buttons.forEach(btn => {
+        btn.addEventListener("click", function() {
+          buttons.forEach(b => b.classList.remove("active"));
+          this.classList.add("active");
+          callback(this.id.replace(btnIdPrefix, ""));
+        });
+      });
+    }
+
+    // 各種トグル群のイベントバインド（非同期タイマーを排除しクリックした瞬間即時発火）
+    setupToggle("btn-size-", function(val) {
+      if (!phoneContainer) return;
+      if (val === "large") {
+        phoneContainer.className = "phone-wrapper size-large";
+      } else {
+        phoneContainer.className = "phone-wrapper size-normal";
+      }
+    });
+
+    setupToggle("btn-font-", function(val) { currentFont = val; updateStyle(); });
+    setupToggle("btn-scale-", function(val) { currentScale = val; updateStyle(); });
+    setupToggle("btn-icon-", function(val) { currentIcon = val; updateStyle(); });
+    setupToggle("btn-bg-", function(val) { currentBg = val; updateStyle(); });
+    setupToggle("btn-cv-", function(val) { currentCvColor = val; updateStyle(); });
+
+    // 入力欄のリアルタイム入力イベント監視
+    [mainInput, subInput, cvInput].forEach(inp => {
+      if (inp) inp.addEventListener("input", syncText);
+    });
+
+    // 初回組み立て起動
+    updateStyle();
+  });
+</script>
+</body>
+</html>

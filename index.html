@@ -111,54 +111,33 @@
 </div>
 <script>
   document.addEventListener("DOMContentLoaded", function() {
-    // 画面上の全要素を取得
     var inMain = document.getElementById('input-main'), inSub = document.getElementById('input-sub'), inCv = document.getElementById('input-cv'), vMain = document.getElementById('v-main'), vSub = document.getElementById('v-sub'), vBtn = document.getElementById('v-btn'), mainCounter = document.getElementById('main-counter'), pScreen = document.getElementById('p-screen'), phoneContainer = document.getElementById('phone-container'), copyLinkBtn = document.getElementById('copyLinkBtn'), clearStorageBtn = document.getElementById('clearStorageBtn');
     var currentFont = "sans", currentScale = "medium";
 
-    // 💡 リアルタイムの文字同期 ＆ X直リンクURL（href）の自動書き換え
+    // 💡 フリーズと遮断の原因だった「copyLinkBtn.hrefの動的書き換え」を完全に全消去しました
     function sync() {
       var mainText = inMain ? inMain.value : "", subText = inSub ? inSub.value : "", cvText = inCv ? inCv.value : "ボタンテキスト";
-      
       if (vMain) vMain.innerText = mainText || "（メインコピー）";
       if (vSub) vSub.innerText = subText || "（サブコピー）";
       if (vBtn) vBtn.innerText = cvText || "ボタンテキスト";
-
       if (mainCounter) {
         var len = mainText.length; mainCounter.innerText = len + " / 20文字";
         mainCounter.className = len > 20 ? "count-badge alert-red" : "count-badge";
       }
-
-      // 💡 プログラムによるジャンプをせず、ただの安全な直リンクとして機能させる自動書き換えロジック
-      if (copyLinkBtn) {
-        var sizeEl = document.querySelector('[id^="btn-size-"].active');
-        var sizeName = sizeEl ? (sizeEl.innerText || "標準") : "標準";
-        var txt = mainText || "未入力";
-        var textToCopy = "【" + sizeName + "サイズでLPファーストビューを検証しました！】\nメインコピー: " + txt + "\nスマホ完全フィット検証ミラー「lp-fv-mirror」で文字見切れを防ぐ🔥";
-        copyLinkBtn.href = 'https://twitter.com' + encodeURIComponent(textToCopy);
-      }
     }
 
-    // 💡 スマホ枠内の見た目（フォント・大中小サイズ）を完全一括制御
     function updateStyle() {
       if (!pScreen || !vMain || !vSub || !vBtn) return;
-      
-      // 実機フォントの切り替え
       var fontName = "'Helvetica Neue', Arial, 'Hiragino Kaku Gothic ProN', sans-serif";
       if (currentFont === "serif") fontName = "'Noto Serif JP', 'Hiragino Mincho ProN', serif";
       pScreen.style.fontFamily = fontName; vMain.style.fontFamily = fontName; vSub.style.fontFamily = fontName; vBtn.style.fontFamily = fontName;
 
-      // 大中小ボタン（質問4）のサイズ微調整
-      if (currentScale === "small") { 
-        vMain.style.fontSize = "1.1rem"; vSub.style.fontSize = "0.8rem"; vBtn.style.padding = "10px"; vBtn.style.fontSize = "0.85rem"; 
-      } else if (currentScale === "large") { 
-        vMain.style.fontSize = "1.8rem"; vSub.style.fontSize = "1.15rem"; vBtn.style.padding = "16px"; vBtn.style.fontSize = "1.1rem"; 
-      } else { 
-        vMain.style.fontSize = "1.4rem"; vSub.style.fontSize = "0.95rem"; vBtn.style.padding = "14px"; vBtn.style.fontSize = "0.95rem"; 
-      }
+      if (currentScale === "small") { vMain.style.fontSize = "1.1rem"; vSub.style.fontSize = "0.8rem"; vBtn.style.padding = "10px"; vBtn.style.fontSize = "0.85rem"; }
+      else if (currentScale === "large") { vMain.style.fontSize = "1.8rem"; vSub.style.fontSize = "1.15rem"; vBtn.style.padding = "16px"; vBtn.style.fontSize = "1.1rem"; }
+      else { vMain.style.fontSize = "1.4rem"; vSub.style.fontSize = "0.95rem"; vBtn.style.padding = "14px"; vBtn.style.fontSize = "0.95rem"; }
       sync();
     }
 
-    // トグルボタン切り替えのイベント処理
     function setupToggle(btnIdPrefix, callback) {
       var buttons = document.querySelectorAll('[id^="' + btnIdPrefix + '"]');
       buttons.forEach(function(btn) {
@@ -169,16 +148,33 @@
       });
     }
 
-    // 質問1：復活したデバイスサイズ切り替え（iPhone標準 / Pro Max大）の連動ロジック
     setupToggle("btn-size-", function(val) {
       if (phoneContainer) phoneContainer.className = val === "large" ? "phone-wrapper size-large" : "phone-wrapper size-normal";
       sync();
     });
-
     setupToggle("btn-font-", function(val) { currentFont = val; updateStyle(); });
     setupToggle("btn-scale-", function(val) { currentScale = val; updateStyle(); });
 
     [inMain, inSub, inCv].forEach(function(el) { if(el) el.addEventListener('input', sync); });
+
+    // 💡 過去作と100%完全一致：URLの偽装クリックを完全にやめ、純粋にクリップボードへテキストをコピーするだけの鉄壁エラーフリー設計
+    if (copyLinkBtn) {
+      copyLinkBtn.addEventListener("click", function() {
+        var sizeEl = document.querySelector('[id^="btn-size-"].active');
+        var sizeName = sizeEl ? (sizeEl.innerText || "標準") : "標準";
+        var txt = inMain ? (inMain.value || "未入力") : "未入力";
+        var textToCopy = "【" + sizeName + "サイズでLPファーストビューを検証しました！】\nメインコピー: " + txt + "\nスマホ完全フィット検証ミラー「lp-fv-mirror」で文字見切れを防ぐ🔥";
+
+        navigator.clipboard.writeText(textToCopy).then(function() {
+          copyLinkBtn.textContent = "コピー完了！そのままX等の画面へ貼れます✅";
+          copyLinkBtn.style.backgroundColor = "#2ed573";
+          setTimeout(function() {
+            copyLinkBtn.textContent = "文章をコピーしてXへ完了報告 📋";
+            copyLinkBtn.style.backgroundColor = "#1da1f2";
+          }, 2000);
+        }).catch(function() { console.log("コピーエラー"); });
+      });
+    }
 
     if (clearStorageBtn) {
       clearStorageBtn.onclick = function() {
@@ -187,8 +183,6 @@
         }
       };
     }
-
-    // 初回自動起動
     updateStyle();
   });
 </script>
